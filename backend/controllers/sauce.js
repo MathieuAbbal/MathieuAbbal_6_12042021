@@ -27,17 +27,29 @@ exports.createSauce = (req, res, next) => {
 };
 // Modification d'une sauce
 exports.modifySauce = (req, res, next) => {
-  //on regarde si req.file existe
-  //Opérateur ternaire équivalent à if() {} else {} => condition ? Instruction si vrai : Instruction si faux
-  const sauceObject = req.file ?
-    {//si il existe on traite l'image 
+  let sauceObject = {};
+  //on regarde si il y a un fichier dans la requête
+  //Opérateur ternaire équivalent à if() {} else {} => condition ? Instruction si vrai : Instruction si faux   
+  req.file ? (
+    Sauces.findOne({ _id: req.params.id })
+      //On utilise la méthode findOne et on lui passe l'objet de comparaison, on veut que l'id de la sauce soit le même que le paramètre de requête
+      .then(sauce => {
+        //supprime l'ancienne images 
+        const filename = sauce.imageUrl.split("/images/")[1];
+        fs.unlinkSync(`images/${filename}`);
+      })
+      .catch(error => res.status(500).json({ error })),
+
+    sauceObject = {
+      //si il existe on traite l'image
       ...JSON.parse(req.body.sauce),
-      imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+      imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
     }
-    // Si la modification ne contient pas de nouvelle image
-    : { ...req.body };
+  )
+    : sauceObject = { ...req.body };
+
   Sauces.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-    .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
+    .then((sauce) => { res.status(200).json({ message: "Sauces modifiée !" }) })//recupère l'objet et modifie l'identifiant
     .catch(error => res.status(400).json({ error }));
 };
 // Suppression d'une sauce
@@ -83,7 +95,7 @@ exports.like = (req, res, next) => {
         sauce.usersLiked.push(req.body.userId)
         console.log('like ajouté !')
       }
-      
+
       if (req.body.like === -1) {
         sauce.dislikes++;
         sauce.usersDisliked.push(req.body.userId)
