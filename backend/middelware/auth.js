@@ -4,8 +4,8 @@ const jwt = require('jsonwebtoken');
 // Création d'une authentification avec TOKEN 
 module.exports = (req, res, next) => {
   try {
-    //recupère le token dans le header
-    const token = req.headers.authorization.split(' ')[1];
+    //recupère le token dans le header en oubliant le mot clé Bearer
+    const token = req.headers.authorization.split(' ')[1];//crée un tableau et récupère l'élément aprés l'espace
     //décode le token
     const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
     //récupere l'userId

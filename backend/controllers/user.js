@@ -4,12 +4,14 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 //importation du package pour créer et verifier les TOKENS
 const jwt = require('jsonwebtoken');
+//module node pour masquer l'email
+const MaskData = require('../node_modules/maskdata');
 //exportation de la fonction pour l'enregistrement d'un utilisateur
 exports.signup = (req, res, next) => {
     bcrypt.hash(req.body.password, 10)//crypte le mot de passe
         .then(hash => {
             const user = new User({ //création d'un nouvel utilisateur
-                email: req.body.email,
+                email: MaskData.maskEmail2(req.body.email),
                 password: hash
             });
             user.save()//enregistre dans la BDD
@@ -17,11 +19,12 @@ exports.signup = (req, res, next) => {
                 .catch(error => res.status(400).json({ error }));
         })
         .catch(error => res.status(500).json({ error }));
+
 };
 //exportation de la fonction pour connecter un utilisateur existant
 exports.login = (req, res, next) => {
     //récupére l'utilisateur
-    User.findOne({ email: req.body.email })//objet de comparaison
+    User.findOne({ email: MaskData.maskEmail2(req.body.email) })//objet de comparaison
         .then(user => {
             if (!user) {
                 return res.status(401).json({ error: 'Utilisateur non trouvé !' });
@@ -34,14 +37,14 @@ exports.login = (req, res, next) => {
                     res.status(200).json({//retourne les données attendu par le front
                         userId: user._id,
                         token: jwt.sign(
-                            { userId: user._id },//les sauces créer ne pouront pas être modifié par un autre utilisateur
-                            'RANDOM_TOKEN_SECRET',//clé secrète
+                            { userId: user._id },//on encode les données que l'on souhaite
+                            'RANDOM_TOKEN_SECRET',//clé secrète pour l'encodage
                             { expiresIn: '24h' }//expiration du TOKEN
 
                         )
                     });
                 })
-                .catch(error => res.status(500).json({ error }));
+                .catch(error => res.status(500).json({ error}));
         })
         .catch(error => res.status(500).json({ error }));
 };

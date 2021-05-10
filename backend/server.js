@@ -6,15 +6,17 @@ const app = require('./app');
 const normalizePort = val => {
   const port = parseInt(val, 10);
 
-  if (isNaN(port)) {
-    return val;
+  if (isNaN(port)) {  // si la constante "port" n'est pas un Nombre (isNaN) 
+    return val;       // renvoie de l'argument qui passé à la fonction
   }
-  if (port >= 0) {
+  if (port >= 0) {    // si la valeur de la constante "port" est supérieur à zéro donc valide: la fonction renvoie la consante port
     return port;
   }
-  return false;
+  return false;       //sinon (port<0) la fonction renvoie alors false
 };
+//si process.env.PORT(port d'environnement lors du démarage) n'est pas disponible alors on se sert du port 3000
 const port = normalizePort(process.env.PORT || '3000');
+//attribue un nom a une valeur
 app.set('port', port);
 // la fonction errorHandler  recherche les différentes erreurs et les gère de manière appropriée.
 const errorHandler = error => {

@@ -4,13 +4,17 @@ const express = require('express');
 const app = express();
 //importation mongoose
 const mongoose = require('mongoose');
+//importation de helmet
+const helmet = require("helmet");
 //importation du package pour avoir accès au chemin du fichier
 const path = require('path');
+//importation du package pour nettoyer les entrées utilisateur
+const mongoSanitize = require('express-mongo-sanitize');
 //importation des routes
 const userRoutes = require('./routes/user');
 const saucesRoutes = require('./routes/sauces')
 //logique pour se connecter à la BDD
-mongoose.connect('mongodb+srv://MathieuA:charlyabbal@cluster0.8wwi9.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+mongoose.connect('mongodb+srv://MathieuA:charlyabbal@clustermathieua.8wwi9.mongodb.net/SoPekocko?retryWrites=true&w=majority',
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie :) !'))
@@ -28,6 +32,9 @@ app.use((req, res, next) => {
 });
 //permet de décoder une requête encodée en json
 app.use(express.json());
+//Middleware de protection contre les attaques
+app.use(helmet());
+app.use(mongoSanitize());
 //applique les routers et les enregistres
 app.use('/api/sauces', saucesRoutes)
 app.use('/api/auth', userRoutes);
